@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A modern, neon cyber-themed Tic-Tac-Toe web application featuring unbeatable Minimax AI, 2-player pass & play, dynamic score tracking, and immersive audio effects.">
+  <meta name="keywords" content="Tic-Tac-Toe, Minimax Algorithm, Web Development, SkillCraft Technology, Internship Project, JavaScript Game">
+  <meta name="author" content="SkillCraft Technology Intern">
+  <title>Nexus Tic-Tac-Toe | Cyber Arena</title>
+
+  <!-- Google Fonts: Orbitron (Headings/Cyber) & Inter (UI/Body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Ambient Background Glow Elements -->
+  <div class="ambient-glow cyan-glow" aria-hidden="true"></div>
+  <div class="ambient-glow purple-glow" aria-hidden="true"></div>
+
+  <!-- Victory Confetti Canvas -->
+  <canvas id="confetti-canvas" aria-hidden="true"></canvas>
+
+  <div class="app-container">
+    <!-- Header Section -->
+    <header class="game-header">
+      <div class="badge-tag">SkillCraft Internship &bull; Task 03</div>
+      <h1 class="game-title">
+        <span class="neon-x">TIC</span>
+        <span class="divider">-</span>
+        <span class="neon-o">TAC</span>
+        <span class="divider">-</span>
+        <span class="neon-x">TOE</span>
+      </h1>
+      <p class="subtitle">Cyberpunk Arena &bull; Unbeatable AI &amp; Local PvP</p>
+
+      <!-- Audio Mute / Unmute Button -->
+      <button id="sound-toggle-btn" class="icon-btn sound-btn" aria-label="Toggle Sound Effects" title="Toggle Sound (Mute/Unmute)">
+        <span class="sound-icon" id="sound-icon">🔊</span>
+        <span class="sound-label" id="sound-label">Sound ON</span>
+      </button>
+    </header>
+
+    <!-- Game Control Bar (Mode Selector & Match Badge) -->
+    <section class="control-panel" aria-label="Game Controls">
+      <div class="mode-selector" role="radiogroup" aria-label="Game Mode Selection">
+        <button type="button" class="mode-btn active" id="mode-pvc" data-mode="pvc" role="radio" aria-checked="true">
+          <span class="btn-icon">🤖</span>
+          <span class="btn-text">Player vs AI</span>
+        </button>
+        <button type="button" class="mode-btn" id="mode-pvp" data-mode="pvp" role="radio" aria-checked="false">
+          <span class="btn-icon">👥</span>
+          <span class="btn-text">2 Players</span>
+        </button>
+      </div>
+
+      <!-- AI Difficulty Toggle (visible in PvC mode) -->
+      <div class="difficulty-wrapper" id="difficulty-wrapper">
+        <label for="ai-difficulty" class="difficulty-label">AI Level:</label>
+        <select id="ai-difficulty" class="difficulty-select" aria-label="Select AI Difficulty">
+          <option value="unbeatable" selected>⚡ Master (Minimax - Unbeatable)</option>
+          <option value="medium">⚖️ Skilled (Balanced)</option>
+          <option value="easy">🎯 Casual (Rookie)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Scoreboard Section -->
+    <section class="scoreboard-section" aria-label="Scoreboard and Match Info">
+      <!-- Player X Card -->
+      <div class="score-card player-x-card active-turn" id="card-x">
+        <div class="player-avatar neon-x-border">X</div>
+        <div class="player-meta">
+          <span class="player-name" id="name-x">Player X</span>
+          <span class="player-role" id="role-x">Human</span>
+        </div>
+        <div class="score-number" id="score-x" aria-label="Player X Score: 0">0</div>
+      </div>
+
+      <!-- Center Match Info / Draws -->
+      <div class="score-card center-card" id="card-draw">
+        <div class="match-meta">
+          <span class="match-badge">ROUND <span id="round-number">1</span></span>
+          <span class="total-matches">Total: <span id="total-matches">0</span></span>
+        </div>
+        <div class="draw-score-box">
+          <span class="draw-label">DRAWS</span>
+          <span class="score-number draw-number" id="score-draw" aria-label="Tied matches: 0">0</span>
+        </div>
+      </div>
+
+      <!-- Player O Card -->
+      <div class="score-card player-o-card" id="card-o">
+        <div class="player-avatar neon-o-border">O</div>
+        <div class="player-meta">
+          <span class="player-name" id="name-o">AI Bot</span>
+          <span class="player-role" id="role-o">Minimax AI</span>
+        </div>
+        <div class="score-number" id="score-o" aria-label="Player O Score: 0">0</div>
+      </div>
+    </section>
+
+    <!-- Turn Banner & Status Feedback -->
+    <div class="turn-banner" id="turn-banner" aria-live="polite">
+      <div class="status-indicator" id="status-indicator"></div>
+      <span class="status-text" id="status-text">Player X's Turn</span>
+    </div>
+
+    <!-- Main Game Board Grid -->
+    <main class="board-wrapper">
+      <div class="game-board" id="game-board" role="grid" aria-label="Tic Tac Toe 3x3 Board">
+        <!-- Cells generated with data-index 0 to 8 -->
+        <button class="cell" data-index="0" role="gridcell" aria-label="Cell 1: empty" tabindex="0"></button>
+        <button class="cell" data-index="1" role="gridcell" aria-label="Cell 2: empty" tabindex="0"></button>
+        <button class="cell" data-index="2" role="gridcell" aria-label="Cell 3: empty" tabindex="0"></button>
+        <button class="cell" data-index="3" role="gridcell" aria-label="Cell 4: empty" tabindex="0"></button>
+        <button class="cell" data-index="4" role="gridcell" aria-label="Cell 5: empty" tabindex="0"></button>
+        <button class="cell" data-index="5" role="gridcell" aria-label="Cell 6: empty" tabindex="0"></button>
+        <button class="cell" data-index="6" role="gridcell" aria-label="Cell 7: empty" tabindex="0"></button>
+        <button class="cell" data-index="7" role="gridcell" aria-label="Cell 8: empty" tabindex="0"></button>
+        <button class="cell" data-index="8" role="gridcell" aria-label="Cell 9: empty" tabindex="0"></button>
+      </div>
+    </main>
+
+    <!-- Action Buttons -->
+    <footer class="action-panel">
+      <button type="button" class="btn btn-primary" id="new-round-btn" aria-label="Start next round">
+        <span class="btn-icon">⚡</span>
+        <span>Next Round</span>
+      </button>
+      <button type="button" class="btn btn-secondary" id="reset-board-btn" aria-label="Clear current board">
+        <span class="btn-icon">🔄</span>
+        <span>Restart Round</span>
+      </button>
+      <button type="button" class="btn btn-outline" id="reset-score-btn" aria-label="Reset all scores to zero">
+        <span class="btn-icon">🗑️</span>
+        <span>Reset Scores</span>
+      </button>
+    </footer>
+
+    <!-- Informative Footer -->
+    <div class="footer-credit">
+      <p>Developed for <strong>SkillCraft Technology</strong> Web Development Internship &bull; Task 03</p>
+    </div>
+  </div>
+
+  <!-- End Game Notification Overlay Modal -->
+  <div class="modal-overlay" id="result-modal" aria-hidden="true" role="dialog" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-icon" id="modal-icon">🏆</div>
+      <h2 class="modal-title" id="modal-title">Player X Wins!</h2>
+      <p class="modal-desc" id="modal-desc">Brilliant strategic move! Line captured.</p>
+      <div class="modal-buttons">
+        <button type="button" class="btn btn-primary" id="modal-next-btn">Play Again</button>
+        <button type="button" class="btn btn-secondary" id="modal-close-btn">View Board</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Game Logic Script -->
+  <script src="script.js"></script>
+</body>
+</html>
